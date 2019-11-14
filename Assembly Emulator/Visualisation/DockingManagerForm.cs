@@ -32,14 +32,15 @@ namespace Assembly_Emulator
         public DockingManagerForm(string path)
         {
             This = this;
-            InitialSolutionPath = path;
 
             InitializeComponent();
+            SplashControl.ShowDialogSplash(this);
 
             DockingManager.SetAsMDIChild(CodeDockingPanel, true);
             KeyDown += keyDown;
             FormClosed += ClosedForm;
             KeyPreview = true;
+            DoubleBuffered = true;
 
             AddHeaderItem();
             AddToolsItem();
@@ -47,6 +48,26 @@ namespace Assembly_Emulator
             AddItemsUnderEdit();
             AddItemsUnderView();
             AddItemsUnderProject();
+
+            AddSolutionExplorer(path);
+
+            AddOutputWindow();
+            AddFindWindow();
+            AddImmediateWindow();
+
+            AddDebugWindow();
+            AddDisplayWindow();
+
+            Output();
+            CanBackNextChange();
+
+            DockingManager.DockControl(DebugPanel, DisplayPanel, DockingStyle.Tabbed, 350);
+            DockingManager.SetTabPosition(DisplayPanel, 0);
+
+            DockingManager.DockControl(OutputPanel, this, DockingStyle.Bottom, 150);
+            DockingManager.DockControl(FindPanel, OutputPanel, DockingStyle.Tabbed, 150);
+            DockingManager.DockControl(ImmediatePanel, OutputPanel, DockingStyle.Tabbed, 150);
+            DockingManager.SetTabPosition(OutputPanel, 0);
         }
 
         #endregion
@@ -65,9 +86,40 @@ namespace Assembly_Emulator
         AssemblyProgram AssemblyProgram = null;
 
         Panel DisplayPanel = null, DebugPanel = null;
-        string InitialSolutionPath;
 
-        BarItem CreateBarItem(string name, int imgIdx, ImageList imgList = null, EventHandler click = null)
+        void LoadImageList()
+        {
+            this.ImageList.Images.Add("AddItem", Properties.Images.AddItem);
+            this.ImageList.Images.Add("BackBlue", Properties.Images.BackBlue);
+            this.ImageList.Images.Add("BackGrey", Properties.Images.BackGrey);
+            this.ImageList.Images.Add("Comment", Properties.Images.Comment);
+            this.ImageList.Images.Add("Copy", Properties.Images.Copy);
+            this.ImageList.Images.Add("Cut", Properties.Images.Cut);
+            this.ImageList.Images.Add("Find", Properties.Images.Find);
+            this.ImageList.Images.Add("NextBlue", Properties.Images.NextBlue);
+            this.ImageList.Images.Add("NextGrey", Properties.Images.NextGrey);
+            this.ImageList.Images.Add("Open", Properties.Images.Open);
+            this.ImageList.Images.Add("Paste", Properties.Images.Paste);
+            this.ImageList.Images.Add("Play", Properties.Images.Play);
+            this.ImageList.Images.Add("RedoBlue", Properties.Images.RedoBlue);
+            this.ImageList.Images.Add("RedoGrey", Properties.Images.RedoGrey);
+            this.ImageList.Images.Add("Restart", Properties.Images.Restart);
+            this.ImageList.Images.Add("Save", Properties.Images.Save);
+            this.ImageList.Images.Add("SaveAll", Properties.Images.SaveAll);
+            this.ImageList.Images.Add("Step", Properties.Images.Step);
+            this.ImageList.Images.Add("UnComment", Properties.Images.UnComment);
+            this.ImageList.Images.Add("UndoBlue", Properties.Images.UndoBlue);
+            this.ImageList.Images.Add("UndoGrey", Properties.Images.UndoGrey);
+            this.ImageList.Images.Add("NewSln", Properties.Images.NewSln);
+            this.ImageList.Images.Add("OpenSln", Properties.Images.OpenSln);
+            this.ImageList.Images.Add("NewWindow", Properties.Images.NewWindow);
+            this.ImageList.Images.Add("NewProj", Properties.Images.NewProj);
+            this.ImageList.Images.Add("Break", Properties.Images.Break);
+            this.ImageList.Images.Add("Pause", Properties.Images.Pause);
+            this.ImageList.Images.Add("Close", Properties.Images.Close);
+        }
+
+        BarItem CreateBarItem(string name, int imgIdx, EventHandler click = null)
         {
             BarItem item = new BarItem();
 
@@ -76,9 +128,7 @@ namespace Assembly_Emulator
             item.SizeToFit = true;
             item.Text = name;
             item.ImageIndex = imgIdx;
-
-            if (imgList != null)
-                item.ImageList = imgList;
+            item.ImageList = ImageList;
             if (click != null)
                 item.Click += click;
 
@@ -139,19 +189,21 @@ namespace Assembly_Emulator
 
         private void AddToolsItem()
         {
-            backItem = CreateBarItem("Navigate Backward (Ctrl+-)", 0, imageList2, BackClick);
-            nextItem = CreateBarItem("Navigate Forward (Ctrl+Shift+-)", 1, imageList2, NextClick);
+            backItem = CreateBarItem("Navigate Backward (Ctrl+-)", 1, BackClick);
+            nextItem = CreateBarItem("Navigate Forward (Ctrl+Shift+-)", 7, NextClick);
 
-            StartItem = CreateBarItem("Start (F5)", 8, imageList2, Start);
+            StartItem = CreateBarItem("Start (F5)", 11, Start);
             StartItem.PaintStyle = PaintStyle.ImageAndText;
+            StartItem.Text = "Start";
+            StartItem.Tooltip = "Start (F5)";
 
-            undoItem = CreateBarItem("Undo (Ctrl+Z)", 6, imageList2, Undo_Click);
-            redoItem = CreateBarItem("Redo (Ctrl+Y)", 7, imageList2, Redo_Click);
+            undoItem = CreateBarItem("Undo (Ctrl+Z)", 19, Undo_Click);
+            redoItem = CreateBarItem("Redo (Ctrl+Y)", 12, Redo_Click);
 
-            PauseItem = CreateBarItem("Pause (F10)", 8, imageList2, PauseClick);
-            BreakItem = CreateBarItem("Break (Shift+F5)", 8, imageList2, BreakClick);
-            RestartItem = CreateBarItem("Restart (Crtl+Shift+F5)", 8, imageList2, RestartClick);
-            StepItem = CreateBarItem("Step (F11)", 8, imageList2, StepClick);
+            PauseItem = CreateBarItem("Pause (F10)", 26, PauseClick);
+            BreakItem = CreateBarItem("Break (Shift+F5)", 25, BreakClick);
+            RestartItem = CreateBarItem("Restart (Crtl+Shift+F5)", 14, RestartClick);
+            StepItem = CreateBarItem("Step (F11)", 17, StepClick);
 
             PauseItem.Visible = BreakItem.Visible = RestartItem.Visible = StepItem.Visible = false;
 
@@ -161,15 +213,15 @@ namespace Assembly_Emulator
             ToolsBar.Items.AddRange(new BarItem[] {
             backItem,
             nextItem,
-            CreateBarItem("Open File (Ctrl+O)", 3, imageList2, OpenFile),
-            CreateBarItem("Save (Ctrl+S)", 4, imageList2, SaveFile),
-            CreateBarItem("Save All (Ctrl+Shift+S)", 5, imageList2, SaveAllFiles),
-            CreateBarItem("Find in Files (Ctrl+Shift+F)", 11, imageList2, FindFile),
+            CreateBarItem("Open File (Ctrl+O)", 9, OpenFile),
+            CreateBarItem("Save (Ctrl+S)", 15, SaveFile),
+            CreateBarItem("Save All (Ctrl+Shift+S)", 16, SaveAllFiles),
+            CreateBarItem("Find in Files (Ctrl+Shift+F)", 6, FindFile),
             undoItem,
             redoItem,
             StartItem,
-            CreateBarItem("Comment out the selected lines", 14, imageList2, CommentLine),
-            CreateBarItem("Uncomment out the selected lines", 15, imageList2, UncommentLine),
+            CreateBarItem("Comment out the selected lines", 3, CommentLine),
+            CreateBarItem("Uncomment out the selected lines", 18, UncommentLine),
             PauseItem,
             BreakItem,
             RestartItem,
@@ -189,11 +241,11 @@ namespace Assembly_Emulator
         public void AddItemsUnderFile()
         {
             FileItem.Items.AddRange(new BarItem[]{
-                CreateBarItem("New                  (Ctrl+N)", 96, imageList1, NewFile),
-                CreateBarItem("Open                 (Ctrl+O)", 3, imageList2, OpenFile),
-                CreateBarItem("Save                 (Ctrl+S)", 4, imageList2, SaveFile),
-                CreateBarItem("Save All            (Ctrl+Shift+S)", 5, imageList2, SaveAllFiles),
-                CreateBarItem("Exit                   (Alt+F4)", 0, null, (_, __) => { Close(); })
+                CreateBarItem("New                  (Ctrl+N)", 0, NewFile),
+                CreateBarItem("Open                 (Ctrl+O)", 9, OpenFile),
+                CreateBarItem("Save                 (Ctrl+S)", 15, SaveFile),
+                CreateBarItem("Save All            (Ctrl+Shift+S)", 16, SaveAllFiles),
+                CreateBarItem("Exit                   (Alt+F4)", 27, (_, __) => { Close(); })
             });
 
             FileItem.MetroBackColor = ColorTranslator.FromHtml("#eaf0ff");
@@ -209,15 +261,15 @@ namespace Assembly_Emulator
 
         public void AddItemsUnderEdit()
         {
-            undo = CreateBarItem("Undo  (Crtl + Z)", 6, imageList2, Undo_Click);
-            redo = CreateBarItem("Redo  (Crtl + Y)", 7, imageList2, Redo_Click);
+            undo = CreateBarItem("Undo  (Crtl + Z)", 19, Undo_Click);
+            redo = CreateBarItem("Redo  (Crtl + Y)", 12, Redo_Click);
 
             EditItem.Items.AddRange(new BarItem[]{
                 undo,
                 redo,
-                CreateBarItem("Cut     (Crtl + X)", 39, imageList4, Cut_Click),
-                CreateBarItem("Copy  (Crtl + C)", 35, imageList4, Copy_Click),
-                CreateBarItem("Paste (Crtl + V)", 36, imageList4, Paste_Click)
+                CreateBarItem("Cut     (Crtl + X)", 5, Cut_Click),
+                CreateBarItem("Copy  (Crtl + C)", 4, Copy_Click),
+                CreateBarItem("Paste (Crtl + V)", 10, Paste_Click)
             });
 
             BarManager.Items.AddRange(EditItem.Items);
@@ -231,12 +283,12 @@ namespace Assembly_Emulator
 
         public void AddItemsUnderView()
         {
-            ViewItem.Items.Add(CreateBarItem("Debug Window", 0, null, (s, e) => { AddDebugWindow(); }));
-            ViewItem.Items.Add(CreateBarItem("Display Window", 0, null, (s, e) => { AddDisplayWindow(); }));
-            ViewItem.Items.Add(CreateBarItem("Solution Window", 0, null, (s, e) => { AddSolutionExplorer(Project.Solution.This.Path); }));
-            ViewItem.Items.Add(CreateBarItem("Output Window", 0, null, (s, e) => { AddOutputWindow(); }));
-            ViewItem.Items.Add(CreateBarItem("Find Window", 0, null, (s, e) => { AddFindWindow(); }));
-            ViewItem.Items.Add(CreateBarItem("Immediate Window", 0, null, (s, e) => { AddImmediateWindow(); }));
+            ViewItem.Items.Add(CreateBarItem("Debug Window", 23, (s, e) => { AddDebugWindow(); }));
+            ViewItem.Items.Add(CreateBarItem("Display Window", 23, (s, e) => { AddDisplayWindow(); }));
+            ViewItem.Items.Add(CreateBarItem("Solution Window", 23, (s, e) => { AddSolutionExplorer(Project.Solution.This.Path); }));
+            ViewItem.Items.Add(CreateBarItem("Output Window", 23, (s, e) => { AddOutputWindow(); }));
+            ViewItem.Items.Add(CreateBarItem("Find Window", 23, (s, e) => { AddFindWindow(); }));
+            ViewItem.Items.Add(CreateBarItem("Immediate Window", 23, (s, e) => { AddImmediateWindow(); }));
 
             BarManager.Items.AddRange(ViewItem.Items);
 
@@ -249,9 +301,9 @@ namespace Assembly_Emulator
 
         public void AddItemsUnderProject()
         {
-            ProjectItem.Items.Add(CreateBarItem("New Solution", 0, null, NewSolution));
-            ProjectItem.Items.Add(CreateBarItem("Open Solution", 0, null, OpenSolution));
-            ProjectItem.Items.Add(CreateBarItem("Add Project", 0, null, AddProject));
+            ProjectItem.Items.Add(CreateBarItem("New Solution", 21, NewSolution));
+            ProjectItem.Items.Add(CreateBarItem("Open Solution", 22, OpenSolution));
+            ProjectItem.Items.Add(CreateBarItem("Add Project", 24, AddProject));
 
             BarManager.Items.AddRange(ProjectItem.Items);
 
@@ -322,8 +374,6 @@ namespace Assembly_Emulator
             typeof(Panel).InvokeMember("DoubleBuffered", 
                 BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
                 null, SegmentPanel, new object[] { true });
-
-            new FlowLayout(DisplayPanel.Container);
 
             CodeOutputBox = new TextBox();
             CodeOutputBox.Enabled = false;
@@ -403,30 +453,6 @@ namespace Assembly_Emulator
         #endregion
 
         #region Events
-        void DockingManagerForm_Load(object sender, EventArgs e)
-        {
-            AddSolutionExplorer(InitialSolutionPath);
-
-            AddOutputWindow();
-            AddFindWindow();
-            AddImmediateWindow();
-            
-            AddDebugWindow();
-            AddDisplayWindow();
-
-            Output();
-            CanBackNextChange();
-
-            DockingManager.DockControl(DebugPanel, DisplayPanel, DockingStyle.Tabbed, 350);
-            DockingManager.SetTabPosition(DisplayPanel, 0);
-
-            DockingManager.DockControl(OutputPanel, this, DockingStyle.Bottom, 150);
-            DockingManager.DockControl(FindPanel, OutputPanel, DockingStyle.Tabbed, 150);
-            DockingManager.DockControl(ImmediatePanel, OutputPanel, DockingStyle.Tabbed, 150);
-            DockingManager.SetTabPosition(OutputPanel, 0);
-
-            AddCodePage(@"C:\Users\Braun\Desktop\Test Solution\Test Solution\Program.as"); // TODO remove
-        }
 
         void bar1_DrawBackground(object sender, PaintEventArgs e)
         {
@@ -1024,16 +1050,16 @@ namespace Assembly_Emulator
         {
             undo.Enabled = undoItem.Enabled = u;
             redo.Enabled = redoItem.Enabled = r;
-            undo.ImageIndex = undoItem.ImageIndex = u ? 8 : 6; // TODO Icons
-            redo.ImageIndex = redoItem.ImageIndex = r ? 9 : 7;
+            undo.ImageIndex = undoItem.ImageIndex = u ? 19 : 20;
+            redo.ImageIndex = redoItem.ImageIndex = r ? 12 : 13;
         }
 
         private void CanBackNextChange()
         {
             nextItem.Enabled = History.CanNext;
             backItem.Enabled = History.CanBack;
-            nextItem.ImageIndex = History.CanNext ? 4 : 7; // TODO Icons
-            backItem.ImageIndex = History.CanBack ? 5 : 8;
+            nextItem.ImageIndex = History.CanNext ? 7 : 8;
+            backItem.ImageIndex = History.CanBack ? 1 : 2;
         }
 
         private void NextClick(object sender, EventArgs e)

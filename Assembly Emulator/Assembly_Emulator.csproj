@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Syncfusion.Edit.Windows, Version=17.3460.0.14, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
     <Reference Include="Syncfusion.Grid.Windows, Version=17.3460.0.14, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL" />
@@ -58,10 +61,15 @@
     <Compile Include="Project\History.cs" />
     <Compile Include="Project\Project.cs" />
     <Compile Include="Project\Solution.cs" />
-    <Compile Include="Properties\Images.Designer.cs">
+    <Compile Include="Properties\Images1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Images.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\SolutionImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SolutionImages.resx</DependentUpon>
     </Compile>
     <Compile Include="Visualisation\DockingManagerForm.cs">
       <SubType>Form</SubType>
@@ -79,11 +87,17 @@
       <SubType>Component</SubType>
     </Compile>
     <EmbeddedResource Include="Properties\Images.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Images1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\SolutionImages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Images.Designer.cs</LastGenOutput>
+      <LastGenOutput>SolutionImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Visualisation\DockingManagerForm.resx">
       <DependentUpon>DockingManagerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Visualisation\SolutionExplorerView.resx">
       <DependentUpon>SolutionExplorerView.cs</DependentUpon>
@@ -99,18 +113,45 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Images\02.png" />
-    <None Include="Images\03.png" />
-    <None Include="Images\05.png" />
-    <None Include="Images\01.png" />
-    <None Include="Images\10.png" />
-    <None Include="Images\Refresh.png" />
-    <None Include="Images\011.png" />
-    <None Include="Images\021.png" />
-    <None Include="Images\031.png" />
-    <None Include="Images\051.png" />
-    <None Include="Images\101.png" />
-    <None Include="Images\Refresh1.png" />
+    <Content Include="Icon.ico" />
+    <Content Include="Images\Edit\Copy.png" />
+    <Content Include="Images\Edit\Cut.png" />
+    <Content Include="Images\Edit\Paste.png" />
+    <Content Include="Images\Edit\RedoBlue.png" />
+    <Content Include="Images\Edit\RedoGrey.png" />
+    <Content Include="Images\Edit\UndoBlue.png" />
+    <Content Include="Images\Edit\UndoGrey.png" />
+    <Content Include="Images\File\AddItem.png" />
+    <Content Include="Images\File\Close.png" />
+    <Content Include="Images\File\Open.png" />
+    <Content Include="Images\File\Save.png" />
+    <Content Include="Images\File\SaveAll.png" />
+    <Content Include="Images\IDE\Icon.ico" />
+    <Content Include="Images\IDE\Icon.png" />
+    <Content Include="Images\IDE\SplashScreen.png" />
+    <Content Include="Images\Project\NewProj.png" />
+    <Content Include="Images\Project\NewSln.png" />
+    <Content Include="Images\Project\OpenSln.png" />
+    <Content Include="Images\Solution\File.png" />
+    <Content Include="Images\Solution\Folder.png" />
+    <Content Include="Images\Solution\OpenFolder.png" />
+    <Content Include="Images\Solution\Proj.png" />
+    <Content Include="Images\Solution\ProjFile.png" />
+    <Content Include="Images\Solution\Refresh.png" />
+    <Content Include="Images\Solution\Sln.png" />
+    <Content Include="Images\Tools\BackBlue.png" />
+    <Content Include="Images\Tools\BackGrey.png" />
+    <Content Include="Images\Tools\Break.png" />
+    <Content Include="Images\Tools\Comment.png" />
+    <Content Include="Images\Tools\Find.png" />
+    <Content Include="Images\Tools\NextBlue.png" />
+    <Content Include="Images\Tools\NextGrey.png" />
+    <Content Include="Images\Tools\Pause.png" />
+    <Content Include="Images\Tools\Play.png" />
+    <Content Include="Images\Tools\Restart.png" />
+    <Content Include="Images\Tools\Step.png" />
+    <Content Include="Images\Tools\UnComment.png" />
+    <Content Include="Images\View\NewWindow.png" />
     <Content Include="Visualisation\VS.ico" />
   </ItemGroup>
   <ItemGroup />

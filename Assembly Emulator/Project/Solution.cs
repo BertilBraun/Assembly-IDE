@@ -65,6 +65,7 @@ namespace Assembly_Emulator.Project
             System.IO.Directory.CreateDirectory(Directory + @"\" + name);
             File.WriteAllText(SlnPath, doc.ToString());
             File.WriteAllText(Directory + @"\" + name + @"\" + name + ".proj", proj.ToString());
+            This = new Solution(SlnPath);
         }
 
         public static string CreateNewSolution(string name, string directory)
